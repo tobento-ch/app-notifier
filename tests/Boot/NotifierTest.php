@@ -15,6 +15,9 @@ namespace Tobento\App\Notifier\Test\Boot;
 
 use PHPUnit\Framework\TestCase;
 use Tobento\App\Notifier\Boot\Notifier;
+use Tobento\App\Notifier\AvailableChannelsInterface;
+use Tobento\App\Notifier\Storage\NotificationFormattersInterface;
+use Tobento\App\Notifier\Storage\NotificationFactoryInterface;
 use Tobento\Service\Notifier\NotifierInterface;
 use Tobento\Service\Notifier\ChannelsInterface;
 use Tobento\Service\Notifier\QueueHandlerInterface;
@@ -66,6 +69,9 @@ class NotifierTest extends TestCase
         $this->assertInstanceof(NotifierInterface::class, $app->get(NotifierInterface::class));
         $this->assertInstanceof(ChannelsInterface::class, $app->get(ChannelsInterface::class));
         $this->assertInstanceof(QueueHandlerInterface::class, $app->get(QueueHandlerInterface::class));
+        $this->assertInstanceof(AvailableChannelsInterface::class, $app->get(AvailableChannelsInterface::class));
+        $this->assertInstanceof(NotificationFormattersInterface::class, $app->get(NotificationFormattersInterface::class));
+        $this->assertInstanceof(NotificationFactoryInterface::class, $app->get(NotificationFactoryInterface::class));
     }
 
     public function testSendNotification()
@@ -111,5 +117,17 @@ class NotifierTest extends TestCase
         $messages = $app->get(NotifierInterface::class)->send($notification, $recipient);
         
         $this->assertSame(1, $queue->size());
+    }
+    
+    public function testAllConfigChannelsWillBeAvailable()
+    {
+        $app = $this->createApp();
+        $app->boot(Notifier::class);
+        $app->booting();
+        
+        $this->assertSame(
+            ['mail', 'sms', 'storage'],
+            $app->get(AvailableChannelsInterface::class)->names()
+        );
     }
 }
