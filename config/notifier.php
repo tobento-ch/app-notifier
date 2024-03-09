@@ -9,6 +9,7 @@
  * @link        https://www.tobento.ch
  */
 
+use Tobento\App\Notifier\Storage\NotificationFactoryInterface;
 use Tobento\Service\Notifier\ChannelInterface;
 use Tobento\Service\Notifier\Mail;
 use Tobento\Service\Notifier\Symfony;
@@ -54,11 +55,27 @@ return [
                 repository: new Storage\StorageRepository(
                     storage: $container->get(StorageInterface::class)->new(),
                     table: 'notifications',
+                    entityFactory: $container->get(NotificationFactoryInterface::class),
                 ),
                 container: $container,
             );
         },
 
+    ],
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Notification Formatters For The Storage Channel
+    |--------------------------------------------------------------------------
+    |
+    | Configure any formatters needed for your application.
+    |
+    | see: https://github.com/tobento-ch/app-notifier#storage-notification-formatters
+    |
+    */
+    
+    'formatters' => [
+        //\Tobento\App\Notifier\Storage\GeneralNotificationFormatter::class,
     ],
 
     /*
