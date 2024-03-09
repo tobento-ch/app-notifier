@@ -13,6 +13,8 @@ Notifier support for the app using the [Notifier Service](https://github.com/tob
         - [Creating And Sending Notifications](#creating-and-sending-notifications)
         - [Supported Channels](#supported-channels)
         - [Queuing Notifications](#queuing-notifications)
+        - [Available Channels](#available-channels)
+        - [Storage Notification Formatters](#storage-notification-formatters)
 - [Credits](#credits)
 ___
 
@@ -48,6 +50,8 @@ use Tobento\App\AppFactory;
 use Tobento\Service\Notifier\NotifierInterface;
 use Tobento\Service\Notifier\ChannelsInterface;
 use Tobento\Service\Notifier\QueueHandlerInterface;
+use Tobento\App\Notifier\AvailableChannelsInterface;
+use Tobento\App\Notifier\Storage\NotificationFormattersInterface;
 
 // Create the app
 $app = (new AppFactory())->createApp();
@@ -68,6 +72,8 @@ $app->booting();
 $notifier = $app->get(NotifierInterface::class);
 $channels = $app->get(ChannelsInterface::class);
 $queueHandler = $app->get(QueueHandlerInterface::class);
+$availableChannels = $app->get(AvailableChannelsInterface::class);
+$notificationFormatters = $app->get(NotificationFormattersInterface::class);
 
 // Run the app
 $app->run();
@@ -172,6 +178,180 @@ class SomeService
 The [Notifier Boot](#notifier-boot) automatically boots the [App Queue Boot](https://github.com/tobento-ch/app-queue#queue-boot) to support queuing messages out of the box.
 
 You will only need to configure your queues in the [Queue Config](https://github.com/tobento-ch/app-queue#queue-config) file.
+
+### Available Channels
+
+The available channels may be used to restrict channels for certain services or to display its names and/or titles. By default all channels specified in the ```app/config/notifier.php``` file will be available.
+
+```php
+use Tobento\App\Notifier\AvailableChannelsInterface;
+
+$channels = $app->get(AvailableChannelsInterface::class);
+
+var_dump($channels->has(channel: 'sms'));
+// bool(true)
+
+var_dump($channels->titleFor(channel: 'sms'));
+// string(3) "Sms"
+
+var_dump($channels->names());
+// array(3) {[0]=> string(4) "mail" [1]=> string(3) "sms" [2]=> string(7) "storage"}
+
+var_dump($channels->titles());
+// array(3) {[0]=> string(4) "Mail" [1]=> string(3) "Sms" [2]=> string(7) "Storage"} 
+
+var_dump($channels->titlesToString(separator: ', '));
+// string(18) "Mail, Sms, Storage"
+
+// Add a new title for a channel returning a new instance:
+$channels = $channels->withTitle(channel: 'sms', title: 'SMS Channel');
+var_dump($channels->titleFor(channel: 'sms'));
+// string(11) "SMS Channel"
+
+// Returns a new instance with the channels mapped.
+$channels = $channels->map(fn($title, $name) => strtoupper($title));
+var_dump($channels->titlesToString(separator: ', '));
+// string(26) "MAIL, SMS CHANNEL, STORAGE"
+
+// Returns a new instance with the channels sorted by its name:
+$channels = $channels->sortByName();
+
+// Returns a new instance with the channels sorted by its title:
+$channels = $channels->sortByTitle();
+
+// Count channels:
+var_dump($channels->count());
+// int(3)
+
+// Returns a new instance with with only the channels specified:
+$channels = $channels->only(['sms', 'mail']);
+
+// Returns a new instance with the channels except those specified:
+$channels = $channels->except(['sms', 'mail']);
+
+// Iteration:
+foreach($channels->all() as $name => $title) {}
+// or just:
+foreach($channels as $name => $title) {}
+```
+
+### Storage Notification Formatters
+
+Storage notification formatters may be used to format notifications stored by the [Storage Channel](https://github.com/tobento-ch/service-notifier#storage-channel).
+
+**General Formatter**
+
+You may use the general formatter which uses the following storage message data:
+
+```php
+use Tobento\Service\Notifier\Notification;
+use Tobento\Service\Notifier\Message;
+
+$notification = (new Notification())
+    ->addMessage('storage', new Message\Storage([
+        'message' => 'You received a new order.',
+        'action_text' => 'View Order',
+        'action_route' => 'orders.view',
+        'action_route_parameters' => ['id' => 555],
+    ]));
+```
+
+In ```app/config/notifier.php```:
+
+```php
+'formatters' => [
+    \Tobento\App\Notifier\Storage\GeneralNotificationFormatter::class,
+],
+```
+
+The ```action_route``` and ```action_route_parameters``` data will used to generate the message url if you have installed the [App Http - Routing Boot](https://github.com/tobento-ch/app-http#routing-boot).
+
+The ```message``` and ```action_text``` data will be translated by the formatter if you have installed the [App Translation Boot](https://github.com/tobento-ch/app-translation#translation-boot).
+
+**General Formatter Example**
+
+You may create your own general formatter for notifications:
+
+```php
+use Tobento\App\Notifier\Storage\NotificationFormatterInterface;
+use Tobento\App\Notifier\Storage\Notification;
+
+class GeneralNotificationFormatter implements NotificationFormatterInterface
+{
+    public function format(Notification $notification): Notification
+    {
+        // General data available:
+        $recipientId = $notification->get('recipient_id');
+        $recipientType = $notification->get('recipient_type');
+        $readAt = $notification->get('read_at');
+        $createdAt = $notification->get('created_at');
+        $subject = $notification->get('data.subject', '');
+        $content = $notification->get('data.content', '');
+        
+        // Format:
+        return $notification
+            ->withMessage($subject.': '.$content);
+    }
+}
+```
+
+In ```app/config/notifier.php```:
+
+```php
+'formatters' => [
+    GeneralNotificationFormatter::class,
+],
+```
+
+**Specific Formatter Example**
+
+You may create a specific formatter to format specific notifications only:
+
+```php
+use Tobento\App\Notifier\Storage\NotificationFormatterInterface;
+use Tobento\App\Notifier\Storage\Notification;
+use Tobento\Service\Translation\TranslatorInterface;
+use Tobento\Service\Routing\RouterInterface;
+
+class NewOrderNotificationFormatter implements NotificationFormatterInterface
+{
+    public function __construct(
+        protected TranslatorInterface $translator,
+        protected RouterInterface $router,
+    ) {}
+    
+    public function format(Notification $notification): Notification
+    {
+        // You may only format specific notifications
+        if (!$notification->name() instanceof NewOrderNotification) {
+            return $notification;
+        }
+        
+        // Stop further formatters to format notification:
+        $notification->stopPropagation(true);
+        
+        // Retrieve specific message data:
+        $orderId = $notification->get('data.order_id');
+        
+        // Format:
+        return $notification
+            ->withMessage($this->translator->trans('New order received'))
+            ->withAddedAction(
+                text: $this->translator->trans('View Order'),
+                url: $this->router->url('orders.view', ['id' => $orderId]),
+            );
+    }
+}
+```
+
+In ```app/config/notifier.php```:
+
+```php
+'formatters' => [
+    NewOrderNotificationFormatter::class,
+    GeneralNotificationFormatter::class,
+],
+```
 
 # Credits
 
