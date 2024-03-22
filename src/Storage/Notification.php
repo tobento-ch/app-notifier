@@ -70,7 +70,7 @@ class Notification
      */
     public function id(): string
     {
-        return $this->get('id', '');
+        return $this->ensureString($this->get('id'));
     }
     
     /**
@@ -80,7 +80,7 @@ class Notification
      */
     public function name(): string
     {
-        return $this->get('name', '');
+        return $this->ensureString($this->get('name'));
     }
     
     /**
@@ -90,7 +90,7 @@ class Notification
      */
     public function recipientId(): string
     {
-        return $this->get('recipient_id', '');
+        return $this->ensureString($this->get('recipient_id'));
     }
     
     /**
@@ -100,7 +100,7 @@ class Notification
      */
     public function recipientType(): string
     {
-        return $this->get('recipient_type', '');
+        return $this->ensureString($this->get('recipient_type'));
     }
     
     /**
@@ -111,10 +111,10 @@ class Notification
     public function message(): string
     {
         if ($this->has('data.message')) {
-            return $this->get('data.message', '');
+            return $this->ensureString($this->get('data.message'));
         }
         
-        return $this->get('data.subject', '');
+        return $this->ensureString($this->get('data.subject'));
     }
     
     /**
@@ -201,5 +201,20 @@ class Notification
     protected function set(string $key, mixed $value): void
     {
         $this->attributes = Arr::set($this->attributes, $key, $value);
+    }
+    
+    /**
+     * Ensure string.
+     *
+     * @param mixed $value
+     * @return string
+     */
+    protected function ensureString(mixed $value): string
+    {
+        if (is_scalar($value)) {
+            return (string)$value;
+        }
+        
+        return '';
     }
 }
