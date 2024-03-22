@@ -40,10 +40,28 @@ class NotificationTest extends TestCase
         $this->assertFalse($n->has('data.foo'));
     }
     
+    public function testIdMethod()
+    {
+        $this->assertSame('Foo', (new Notification(['id' => 'Foo']))->id());
+        $this->assertSame('', (new Notification([]))->id());
+    }
+    
     public function testNameMethod()
     {
         $this->assertSame('Foo', (new Notification(['name' => 'Foo']))->name());
         $this->assertSame('', (new Notification([]))->name());
+    }
+    
+    public function testRecipientIdMethod()
+    {
+        $this->assertSame('Foo', (new Notification(['recipient_id' => 'Foo']))->recipientId());
+        $this->assertSame('', (new Notification([]))->recipientId());
+    }
+    
+    public function testRecipientTypeMethod()
+    {
+        $this->assertSame('Foo', (new Notification(['recipient_type' => 'Foo']))->recipientType());
+        $this->assertSame('', (new Notification([]))->recipientType());
     }
     
     public function testMessageMethod()
