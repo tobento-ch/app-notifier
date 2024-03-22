@@ -281,8 +281,10 @@ class GeneralNotificationFormatter implements NotificationFormatterInterface
     public function format(Notification $notification): Notification
     {
         // General data available:
-        $recipientId = $notification->get('recipient_id');
-        $recipientType = $notification->get('recipient_type');
+        $id = $notification->id();
+        $name = $notification->name();
+        $recipientId = $notification->recipientId();
+        $recipientType = $notification->recipientType();
         $readAt = $notification->get('read_at');
         $createdAt = $notification->get('created_at');
         $subject = $notification->get('data.subject', '');
