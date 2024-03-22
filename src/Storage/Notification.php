@@ -64,6 +64,16 @@ class Notification
     }
     
     /**
+     * Returns the notification id.
+     *
+     * @return string
+     */
+    public function id(): string
+    {
+        return $this->get('id', '');
+    }
+    
+    /**
      * Returns the notification name.
      *
      * @return string
@@ -71,6 +81,26 @@ class Notification
     public function name(): string
     {
         return $this->get('name', '');
+    }
+    
+    /**
+     * Returns the recipient ID.
+     *
+     * @return string
+     */
+    public function recipientId(): string
+    {
+        return $this->get('recipient_id', '');
+    }
+    
+    /**
+     * Returns the recipient type.
+     *
+     * @return string
+     */
+    public function recipientType(): string
+    {
+        return $this->get('recipient_type', '');
     }
     
     /**
