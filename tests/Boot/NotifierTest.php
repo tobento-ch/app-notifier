@@ -18,6 +18,7 @@ use Tobento\App\Notifier\Boot\Notifier;
 use Tobento\App\Notifier\AvailableChannelsInterface;
 use Tobento\App\Notifier\Storage\NotificationFormattersInterface;
 use Tobento\App\Notifier\Storage\NotificationFactoryInterface;
+use Tobento\Service\Console\ConsoleInterface;
 use Tobento\Service\Notifier\NotifierInterface;
 use Tobento\Service\Notifier\ChannelsInterface;
 use Tobento\Service\Notifier\QueueHandlerInterface;
@@ -72,6 +73,16 @@ class NotifierTest extends TestCase
         $this->assertInstanceof(AvailableChannelsInterface::class, $app->get(AvailableChannelsInterface::class));
         $this->assertInstanceof(NotificationFormattersInterface::class, $app->get(NotificationFormattersInterface::class));
         $this->assertInstanceof(NotificationFactoryInterface::class, $app->get(NotificationFactoryInterface::class));
+    }
+    
+    public function testConsoleCommandsAreAvailable()
+    {
+        $app = $this->createApp();
+        $app->boot(Notifier::class);
+        $app->booting();
+        
+        $console = $app->get(ConsoleInterface::class);
+        $this->assertTrue($console->hasCommand('notifications:clear'));
     }
 
     public function testSendNotification()
