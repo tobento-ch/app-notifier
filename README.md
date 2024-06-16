@@ -15,6 +15,7 @@ Notifier support for the app using the [Notifier Service](https://github.com/tob
         - [Queuing Notifications](#queuing-notifications)
         - [Available Channels](#available-channels)
         - [Storage Notification Formatters](#storage-notification-formatters)
+        - [Clear Notifications Command](#clear-notifications-command)
 - [Credits](#credits)
 ___
 
@@ -354,6 +355,31 @@ In ```app/config/notifier.php```:
     GeneralNotificationFormatter::class,
 ],
 ```
+
+### Clear Notifications Command
+
+If you have installed the [App Console](https://github.com/tobento-ch/app-console) you may clear all notifications from channels which supports it such as [storage channels](https://github.com/tobento-ch/service-notifier#storage-channel) using the ```notifications:clear``` command.
+
+**Clearing all notifications from all supported channels**
+
+```
+php ap notifications:clear
+```
+
+**Clearing all notifications from all specific channels**
+
+```
+php ap notifications:clear --channel=foo --channel=bar
+```
+
+**Available Options**
+
+| Option | Description |
+| --- | --- |
+| ```--channel=name``` | The name(s) of the channel(s). |
+| ```--read-only``` | Clears only notifications that are read. |
+| ```--unread-only``` | Clears only notifications that are unread. |
+| ```--older-than-days=10``` | The number of days after which to clear notifications. |
 
 # Credits
 
