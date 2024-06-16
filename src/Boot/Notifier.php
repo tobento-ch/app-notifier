@@ -25,6 +25,7 @@ use Tobento\App\Notifier\Storage\NotificationFactoryInterface;
 use Tobento\App\Notifier\Storage\NotificationFactory;
 use Tobento\App\Notifier\Storage\NotificationFormattersInterface;
 use Tobento\App\Notifier\Storage\NotificationFormatters;
+use Tobento\Service\Console\ConsoleInterface;
 use Tobento\Service\Notifier\NotifierInterface;
 use Tobento\Service\Notifier\Notifier as ServiceNotifier;
 use Tobento\Service\Notifier\ChannelsInterface;
@@ -106,5 +107,10 @@ class Notifier extends Boot
 
         // install migration after channels:        
         $migration->install(\Tobento\App\Notifier\Migration\Storages::class);
+        
+        // console commands:
+        $this->app->on(ConsoleInterface::class, function(ConsoleInterface $console): void {
+            $console->addCommand(\Tobento\App\Notifier\Console\ClearNotificationsCommand::class);
+        });
     }
 }
