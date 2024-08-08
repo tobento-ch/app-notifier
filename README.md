@@ -15,6 +15,7 @@ Notifier support for the app using the [Notifier Service](https://github.com/tob
         - [Queuing Notifications](#queuing-notifications)
         - [Available Channels](#available-channels)
         - [Storage Notification Formatters](#storage-notification-formatters)
+        - [Custom Notifications](#custom-notifications)
         - [Clear Notifications Command](#clear-notifications-command)
 - [Credits](#credits)
 ___
@@ -52,6 +53,7 @@ use Tobento\Service\Notifier\NotifierInterface;
 use Tobento\Service\Notifier\ChannelsInterface;
 use Tobento\Service\Notifier\QueueHandlerInterface;
 use Tobento\App\Notifier\AvailableChannelsInterface;
+use Tobento\App\Notifier\NotificationsInterface;
 use Tobento\App\Notifier\Storage\NotificationFormattersInterface;
 
 // Create the app
@@ -75,6 +77,7 @@ $channels = $app->get(ChannelsInterface::class);
 $queueHandler = $app->get(QueueHandlerInterface::class);
 $availableChannels = $app->get(AvailableChannelsInterface::class);
 $notificationFormatters = $app->get(NotificationFormattersInterface::class);
+$notifications = $app->get(NotificationsInterface::class);
 
 // Run the app
 $app->run();
@@ -354,6 +357,72 @@ In ```app/config/notifier.php```:
     NewOrderNotificationFormatter::class,
     GeneralNotificationFormatter::class,
 ],
+```
+
+### Custom Notifications
+
+You may easily customize notifications by defining them in the ```app/config/notifier.php``` file:
+
+```php
+use Tobento\Service\Notifier\Parameter\Queue;
+use Tobento\Service\Notifier\NotificationInterface;
+
+'notifications' => [
+    // using a custom notification:
+    UserRegisterNotification::class => CustomUserRegisterNotification::class,
+    
+    // using a notification factory:
+    UserRegisterNotification::class => UserRegisterNotificationFactory::class,
+    
+    // using a closure:
+    UserRegisterNotification::class => function (UserRegisterNotification $notification): NotificationInterface {
+        return $notification->parameter(new Queue());
+    },
+    
+    // if named notification:
+    'register' => CustomUserRegisterNotification::class,
+],
+```
+
+**Creating Custom Notification**
+
+```php
+use Tobento\Service\Notifier\AbstractNotification;
+use Tobento\Service\Notifier\RecipientInterface;
+use Tobento\Service\Notifier\Message;
+
+class CustomUserRegisterNotification extends AbstractNotification implements Message\ToSms
+{
+    public function __construct(
+        protected UserRegisterNotification $notification,
+        // ...
+    ) {}
+    
+    public function toSms(RecipientInterface $recipient, string $channel, SomeService $service): Message\SmsInterface
+    {
+        return new Message\Sms(
+            subject: 'Thanks for your registration',
+        );
+    }
+}
+```
+
+**Creating Notification Factory**
+
+```php
+use Tobento\App\Notifier\NotificationFactoryInterface;
+use Tobento\Service\Notifier\NotificationInterface;
+
+class UserRegisterNotificationFactory implements NotificationFactoryInterface
+{
+    public function createNotification(NotificationInterface $notification): NotificationInterface
+    {
+        // create custom notification:
+        
+        // or modify original:
+        return $notification;
+    }
+}
 ```
 
 ### Clear Notifications Command
