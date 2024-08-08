@@ -17,6 +17,9 @@ use Tobento\App\Boot;
 use Tobento\App\Boot\Config;
 use Tobento\App\Migration\Boot\Migration;
 use Tobento\App\Mail\Boot\Mail;
+use Tobento\App\Notifier\Notifications;
+use Tobento\App\Notifier\NotificationsInterface;
+use Tobento\App\Notifier\Notifier as AppNotifier;
 use Tobento\App\Queue\Boot\Queue;
 use Tobento\App\Database\Boot\Database;
 use Tobento\App\Notifier\AvailableChannelsInterface;
@@ -70,6 +73,16 @@ class Notifier extends Boot
         $config = $config->load('notifier.php');
         
         // interfaces:
+        $this->app->set(
+            NotificationsInterface::class,
+            static function(ContainerInterface $container) use ($config): NotificationsInterface {
+                return new Notifications(
+                    container: $container,
+                    notifications: $config['notifications'] ?? [],
+                );
+            }
+        );
+        
         $this->app->set(QueueHandlerInterface::class, QueueHandler::class)->with([
             'queueName' => $config['queue'] ?? null
         ]);
@@ -84,7 +97,8 @@ class Notifier extends Boot
             }
         );
         
-        $this->app->set(NotifierInterface::class, ServiceNotifier::class);
+        //$this->app->set(NotifierInterface::class, ServiceNotifier::class);
+        $this->app->set(NotifierInterface::class, AppNotifier::class);
         
         $this->app->set(
             AvailableChannelsInterface::class,
