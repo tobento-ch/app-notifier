@@ -93,4 +93,18 @@ return [
     'queue' => null, // if null default from queue config will be used.
     //'queue' => 'notifications',
     
+    /*
+    |--------------------------------------------------------------------------
+    | Custom Notifications
+    |--------------------------------------------------------------------------
+    |
+    | Configure any custom notifications.
+    |
+    | see: https://github.com/tobento-ch/app-notifier#custom-notifications
+    |
+    */
+    
+    'notifications' => [
+        //
+    ],    
 ];
