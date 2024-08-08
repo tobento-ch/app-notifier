@@ -16,6 +16,7 @@ namespace Tobento\App\Notifier\Test\Boot;
 use PHPUnit\Framework\TestCase;
 use Tobento\App\Notifier\Boot\Notifier;
 use Tobento\App\Notifier\AvailableChannelsInterface;
+use Tobento\App\Notifier\NotificationsInterface;
 use Tobento\App\Notifier\Storage\NotificationFormattersInterface;
 use Tobento\App\Notifier\Storage\NotificationFactoryInterface;
 use Tobento\Service\Console\ConsoleInterface;
@@ -73,6 +74,7 @@ class NotifierTest extends TestCase
         $this->assertInstanceof(AvailableChannelsInterface::class, $app->get(AvailableChannelsInterface::class));
         $this->assertInstanceof(NotificationFormattersInterface::class, $app->get(NotificationFormattersInterface::class));
         $this->assertInstanceof(NotificationFactoryInterface::class, $app->get(NotificationFactoryInterface::class));
+        $this->assertInstanceof(NotificationsInterface::class, $app->get(NotificationsInterface::class));
     }
     
     public function testConsoleCommandsAreAvailable()
@@ -103,6 +105,33 @@ class NotifierTest extends TestCase
         $messages = $app->get(NotifierInterface::class)->send($notification, $recipient);
         
         $this->assertTrue(true);
+    }
+    
+    public function testSendNotificationUsesCustomNotificationIfExist()
+    {
+        $app = $this->createApp();
+        $app->boot(Notifier::class);
+        $app->on(NotificationsInterface::class, function (NotificationsInterface $notifications) {
+            $notification = (new Notification(subject: 'Custom', channels: ['email']))
+                ->content('Custom');
+            
+            $notifications->add(name: 'register', notification: $notification);
+        });
+        $app->booting();
+        
+        $notification = (new Notification(subject: 'Lorem', channels: ['email']))
+            ->content('Lorem ipsum')
+            ->name('register');
+
+        // The receiver of the notification:
+        $recipient = new Recipient(
+            email: 'mail@example.com',
+        );
+
+        // Send the notification to the recipient:
+        $messages = $app->get(NotifierInterface::class)->send($notification, $recipient);
+        
+        $this->assertSame('Custom', $messages[0]?->notification()?->getSubject());
     }
     
     public function testNotificationGetsQueued()
