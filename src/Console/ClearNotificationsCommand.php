@@ -26,7 +26,7 @@ class ClearNotificationsCommand extends AbstractCommand
      * The signature of the console command.
      */
     public const SIGNATURE = '
-        notifications:clear | Clears notifications from channels.
+        user:notifications:clear | Clears stored notifications from channels.
         {--channel[] : The name(s) of the channel(s)}
         {--read-only : Clears only notifications that are read}
         {--unread-only : Clears only notifications that are unread}
