@@ -427,18 +427,18 @@ class UserRegisterNotificationFactory implements NotificationFactoryInterface
 
 ### Clear Notifications Command
 
-If you have installed the [App Console](https://github.com/tobento-ch/app-console) you may clear all notifications from channels which supports it such as [storage channels](https://github.com/tobento-ch/service-notifier#storage-channel) using the ```notifications:clear``` command.
+If you have installed the [App Console](https://github.com/tobento-ch/app-console) you may clear all notifications from channels which supports it such as [storage channels](https://github.com/tobento-ch/service-notifier#storage-channel) using the ```user:notifications:clear``` command.
 
 **Clearing all notifications from all supported channels**
 
 ```
-php ap notifications:clear
+php ap user:notifications:clear
 ```
 
 **Clearing all notifications from all specific channels**
 
 ```
-php ap notifications:clear --channel=foo --channel=bar
+php ap user:notifications:clear --channel=foo --channel=bar
 ```
 
 **Available Options**
