@@ -54,7 +54,7 @@ return [
                 name: $name,
                 repository: new Storage\StorageRepository(
                     storage: $container->get(StorageInterface::class)->new(),
-                    table: 'notifications',
+                    table: 'user_notifications',
                     entityFactory: $container->get(NotificationFactoryInterface::class),
                 ),
                 container: $container,
