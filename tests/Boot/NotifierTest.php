@@ -84,7 +84,7 @@ class NotifierTest extends TestCase
         $app->booting();
         
         $console = $app->get(ConsoleInterface::class);
-        $this->assertTrue($console->hasCommand('notifications:clear'));
+        $this->assertTrue($console->hasCommand('user:notifications:clear'));
     }
 
     public function testSendNotification()
