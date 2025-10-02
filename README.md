@@ -30,7 +30,7 @@ composer require tobento/app-notifier
 
 ## Requirements
 
-- PHP 8.0 or greater
+- PHP 8.4 or greater
 
 # Documentation
 
@@ -57,7 +57,7 @@ use Tobento\App\Notifier\NotificationsInterface;
 use Tobento\App\Notifier\Storage\NotificationFormattersInterface;
 
 // Create the app
-$app = (new AppFactory())->createApp();
+$app = new AppFactory()->createApp();
 
 // Add directories:
 $app->dirs()
@@ -150,11 +150,11 @@ class SomeService
     {
         // Create a Notification that has to be sent:
         // using the "email" and "sms" channel
-        $notification = (new Notification(
+        $notification = new Notification(
             subject: 'New Invoice',
             content: 'You got a new invoice for 15 EUR.',
             channels: ['mail', 'sms'],
-        ))->parameter(new Queue(
+        )->parameter(new Queue(
             // you may specify the queue to be used:
             name: 'secondary',
             // you may specify a delay in seconds:
@@ -251,7 +251,7 @@ You may use the general formatter which uses the following storage message data:
 use Tobento\Service\Notifier\Notification;
 use Tobento\Service\Notifier\Message;
 
-$notification = (new Notification())
+$notification = new Notification()
     ->addMessage('storage', new Message\Storage([
         'message' => 'You received a new order.',
         'action_text' => 'View Order',
