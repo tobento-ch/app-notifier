@@ -199,7 +199,7 @@ class AvailableChannels implements AvailableChannelsInterface
     /**
      * Returns the iterator. 
      *
-     * @return Traversable
+     * @return Traversable<string, string>
      */
     public function getIterator(): Traversable
     {

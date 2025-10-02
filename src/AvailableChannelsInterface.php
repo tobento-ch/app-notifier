@@ -18,6 +18,8 @@ use Countable;
 
 /**
  * The available channels. May be used to verify channels, display channel names, e.g.
+ *
+ * @extends IteratorAggregate<string, string>
  */
 interface AvailableChannelsInterface extends Countable, IteratorAggregate
 {
