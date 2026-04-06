@@ -16,6 +16,8 @@ namespace Tobento\App\Notifier\Migration;
 use Tobento\Service\Migration\MigrationInterface;
 use Tobento\Service\Migration\ActionsInterface;
 use Tobento\Service\Migration\Actions;
+use Tobento\Service\Migration\Action\DirCopy;
+use Tobento\Service\Migration\Action\DirDelete;
 use Tobento\Service\Migration\Action\FilesCopy;
 use Tobento\Service\Migration\Action\FilesDelete;
 use Tobento\Service\Dir\DirsInterface;
@@ -42,7 +44,7 @@ class Notifier implements MigrationInterface
         
         $this->files = [
             $this->dirs->get('config') => [
-                $vendor.'/config/notifier.php',
+                $vendor.'/resources/config/notifier.php',
             ],
         ];
     }
@@ -54,7 +56,7 @@ class Notifier implements MigrationInterface
      */
     public function description(): string
     {
-        return 'File notifier config.';
+        return 'Notifier config, assets and views.';
     }
         
     /**
@@ -64,11 +66,34 @@ class Notifier implements MigrationInterface
      */
     public function install(): ActionsInterface
     {
+        $resources = realpath(__DIR__.'/../../').'/resources/';
+        
         return new Actions(
             new FilesCopy(
                 files: $this->files,
                 type: 'config',
                 description: 'Notifier config file.',
+            ),
+            new DirCopy(
+                dir: $resources.'assets/notifier/',
+                destDir: $this->dirs->get('public').'assets/notifier/',
+                name: 'Notifier assets',
+                type: 'assets',
+                description: 'Notifier assets.',
+            ),
+            new DirCopy(
+                dir: $resources.'views/notifier/',
+                destDir: $this->dirs->get('views').'notifier/',
+                name: 'Notifier views',
+                type: 'views',
+                description: 'Notifier views.',
+            ),
+            new DirCopy(
+                dir: $this->dirs->get('vendor').'tobento/js-notifier/src/',
+                destDir: $this->dirs->get('public').'assets/js-notifier/',
+                name: 'JS Notifier assets',
+                type: 'assets',
+                description: 'JS Notifier assets.',
             ),
         );
     }
@@ -85,6 +110,18 @@ class Notifier implements MigrationInterface
                 files: $this->files,
                 type: 'config',
                 description: 'Notifier config file.',
+            ),
+            new DirDelete(
+                dir: $this->dirs->get('public').'assets/notifier/',
+                name: 'Notifier assets',
+                type: 'assets',
+                description: 'Notifier assets.',
+            ),
+            new DirDelete(
+                dir: $this->dirs->get('views').'notifier/',
+                name: 'Notifier views',
+                type: 'views',
+                description: 'Notifier views.',
             ),
         );
     }
