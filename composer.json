@@ -1,6 +1,6 @@
 {
     "name": "tobento/app-notifier",
-    "version": "2.0",
+    "version": "2.0.1",
     "type": "library",
     "description": "App notifier support.",
     "keywords": [
@@ -27,13 +27,20 @@
         "tobento/app": "^2.0",
         "tobento/app-migration": "^2.0",
         "tobento/app-queue": "^2.0",
+        "tobento/app-http": "^2.0",
+        "tobento/app-encryption": "^2.0",
+        "tobento/app-language": "^2.0",
         "tobento/app-mail": "^2.0",
         "tobento/app-database": "^2.0",
+        "tobento/app-translation": "^2.0",
+        "tobento/app-view": "^2.0",
+        "tobento/app-user": "^2.0",
         "tobento/service-collection": "^2.0",
         "tobento/service-autowire": "^2.0",
         "tobento/service-clock": "^2.0",
         "tobento/service-notifier": "^2.0",
         "tobento/service-repository-storage": "^2.0",
+        "tobento/js-notifier": "^1.0",
         "symfony/vonage-notifier": "^7.3",
         "psr/container": "^2.0"
     },  
@@ -45,6 +52,7 @@
         "tobento/service-routing": "^2.0",
         "tobento/service-container": "^2.0",
         "tobento/service-console": "^2.0",
+        "tobento/app-testing": "^2.0",
         "mockery/mockery": "^1.6"
     },
     "autoload": {
