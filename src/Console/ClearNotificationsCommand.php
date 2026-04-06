@@ -15,6 +15,7 @@ namespace Tobento\App\Notifier\Console;
 
 use Tobento\Service\Console\AbstractCommand;
 use Tobento\Service\Console\InteractorInterface;
+use Tobento\Service\Notifier\Browser;
 use Tobento\Service\Notifier\ChannelInterface;
 use Tobento\Service\Notifier\ChannelsInterface;
 use Tobento\Service\Notifier\Storage;
@@ -91,7 +92,10 @@ class ClearNotificationsCommand extends AbstractCommand
         ChannelInterface $channel,
         ClockInterface $clock,
     ): null|int {
-        if (! $channel instanceof Storage\Channel) {
+        if (
+            ! $channel instanceof Storage\Channel
+            && ! $channel instanceof Browser\Channel
+        ) {
             return null;
         }
         
