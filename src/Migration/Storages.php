@@ -16,6 +16,7 @@ namespace Tobento\App\Notifier\Migration;
 use Tobento\Service\Migration\MigrationInterface;
 use Tobento\Service\Migration\ActionsInterface;
 use Tobento\Service\Migration\Actions;
+use Tobento\Service\Notifier\Browser\Channel as ChannelBrowser;
 use Tobento\Service\Notifier\ChannelsInterface;
 use Tobento\Service\Notifier\Storage\Channel as ChannelStorage;
 use Tobento\Service\Notifier\Storage\StorageRepository;
@@ -59,7 +60,7 @@ class Storages implements MigrationInterface
             $channel = $this->channels->get($name);
             
             if (
-                $channel instanceof ChannelStorage
+                ($channel instanceof ChannelStorage || $channel instanceof ChannelBrowser)
                 && $channel->repository() instanceof StorageRepository
             ) {
                 $actions[] = RepositoryAction::newOrNull(
@@ -85,7 +86,7 @@ class Storages implements MigrationInterface
             $channel = $this->channels->get($name);
             
             if (
-                $channel instanceof ChannelStorage
+                ($channel instanceof ChannelStorage || $channel instanceof ChannelBrowser)
                 && $channel->repository() instanceof StorageRepository
             ) {
                 $actions[] = RepositoryDeleteAction::newOrNull(
