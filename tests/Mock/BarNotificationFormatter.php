@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Tobento\App\Notifier\Test\Mock;
 
-use Tobento\App\Notifier\Storage\NotificationFormatterInterface;
-use Tobento\App\Notifier\Storage\Notification;
+use Tobento\App\Notifier\Formatting\NotificationFormatterInterface;
+use Tobento\App\Notifier\Formatting\Notification;
 
 class BarNotificationFormatter implements NotificationFormatterInterface
 {
