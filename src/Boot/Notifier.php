@@ -24,10 +24,14 @@ use Tobento\App\Queue\Boot\Queue;
 use Tobento\App\Database\Boot\Database;
 use Tobento\App\Notifier\AvailableChannelsInterface;
 use Tobento\App\Notifier\AvailableChannels;
-use Tobento\App\Notifier\Storage\NotificationFactoryInterface;
-use Tobento\App\Notifier\Storage\NotificationFactory;
-use Tobento\App\Notifier\Storage\NotificationFormattersInterface;
-use Tobento\App\Notifier\Storage\NotificationFormatters;
+use Tobento\App\Notifier\CookieGuestResolver;
+use Tobento\App\Notifier\CookieReadNotificationResolver;
+use Tobento\App\Notifier\Formatting\NotificationFactoryInterface;
+use Tobento\App\Notifier\Formatting\NotificationFactory;
+use Tobento\App\Notifier\Formatting\NotificationFormattersInterface;
+use Tobento\App\Notifier\Formatting\NotificationFormatters;
+use Tobento\App\Notifier\GuestResolverInterface;
+use Tobento\App\Notifier\ReadNotificationResolverInterface;
 use Tobento\Service\Console\ConsoleInterface;
 use Tobento\Service\Notifier\NotifierInterface;
 use Tobento\Service\Notifier\Notifier as ServiceNotifier;
@@ -46,12 +50,14 @@ class Notifier extends Boot
         'boot' => [
             'installs and loads notifier config file',
             'implements notifier interfaces',
+            'boots features',
         ],
     ];
 
     public const BOOT = [
         Config::class,
         Migration::class,
+        \Tobento\App\Http\Boot\Routing::class, // required for correct assetPath()
         Mail::class,
         Database::class,
         Queue::class,
@@ -97,7 +103,6 @@ class Notifier extends Boot
             }
         );
         
-        //$this->app->set(NotifierInterface::class, ServiceNotifier::class);
         $this->app->set(NotifierInterface::class, AppNotifier::class);
         
         $this->app->set(
@@ -119,8 +124,20 @@ class Notifier extends Boot
             }
         );
 
+        $this->app->set(GuestResolverInterface::class, CookieGuestResolver::class);
+        $this->app->set(ReadNotificationResolverInterface::class, CookieReadNotificationResolver::class);
+        
         // install migration after channels:        
         $migration->install(\Tobento\App\Notifier\Migration\Storages::class);
+        
+        // Features:
+        foreach($config['features'] ?? [] as $feature) {
+            if (is_string($feature)) {
+                $feature = $this->app->make($feature);
+            }
+            
+            $this->app->boot($feature);
+        }
         
         // console commands:
         $this->app->on(ConsoleInterface::class, function(ConsoleInterface $console): void {
