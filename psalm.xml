@@ -26,5 +26,10 @@
                 <directory name="src" />
             </errorLevel>
         </PossiblyUnusedMethod>
+        <PossiblyUnusedParam>
+            <errorLevel type="suppress">
+                <directory name="src" />
+            </errorLevel>
+        </PossiblyUnusedParam>
     </issueHandlers>
 </psalm>
