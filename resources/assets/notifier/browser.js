@@ -30,6 +30,7 @@ function startPull(url, interval, maxFailures) {
                 headers: {
                     "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                     "Content-Type": "application/json",
+                    "X-Exclude-Previous-Uri": "1",
                 },
             });
 

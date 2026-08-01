@@ -165,7 +165,8 @@ class BrowserStream extends Boot
             )
             ->withHeader('Content-Type', 'text/event-stream')
             ->withHeader('Cache-Control', 'no-cache')
-            ->withHeader('Connection', 'keep-alive');
+            ->withHeader('Connection', 'keep-alive')
+            ->withHeader('X-Exclude-Previous-Uri', '1');
     }
     
     /**
