@@ -1,6 +1,6 @@
 {
     "name": "tobento/app-notifier",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "type": "library",
     "description": "App notifier support.",
     "keywords": [
