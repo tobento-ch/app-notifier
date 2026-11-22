@@ -217,14 +217,8 @@ class BrowserGuest extends Boot
                 }
 
                 // Skip if expired
-                $expires = $n->get('expires_at');
-                if (!is_null($expires)) {
-                    $expires = new \DateTimeImmutable($expires);
-
-                    // Skip if expired
-                    if ($expires < $clock->now()) {
-                        return false;
-                    }
+                if ($this->isExpired($n, $clock)) {
+                    return false;
                 }
 
                 return true;
@@ -235,8 +229,11 @@ class BrowserGuest extends Boot
                 $newReadIds[] = $n->get('id');
             }
             
-            // Merge targeted + broadcast
-            $all = array_merge($targeted, $broadcasted);
+            // Merge targeted (not expired) + broadcast
+            $all = array_merge(
+                array_filter($targeted, fn ($n) => !$this->isExpired($n, $clock)),
+                $broadcasted
+            );
 
             foreach ($all as $notification) {
                 $messages[] = $this->mapNotification($notification);
@@ -270,6 +267,24 @@ class BrowserGuest extends Boot
             ],
             code: 200,
         );
+    }
+    
+    /**
+     * Returns true if the notification is expired, otherwise false.
+     *
+     * @param Notification $notification
+     * @param ClockInterface $clock
+     * @return bool
+     */
+    protected function isExpired(Notification $notification, ClockInterface $clock): bool
+    {
+        $expires = $notification->get('expires_at');
+        
+        if (is_null($expires)) {
+            return false;
+        }
+        
+        return new \DateTimeImmutable($expires) < $clock->now();
     }
     
     /**
