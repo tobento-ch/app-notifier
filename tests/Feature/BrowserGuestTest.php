@@ -321,6 +321,55 @@ class BrowserGuestTest extends \Tobento\App\Testing\TestCase
         $this->assertSame('A1', $notifications[0]['text']);
     }
     
+    public function testExpiredTargetedNotificationsAreIgnored(): void
+    {
+        $this->fakeConfig()->with('notifier.features', [
+            new BrowserGuest(withAcl: false),
+        ]);
+
+        $http = $this->fakeHttp();
+        $this->sendGuestNotification();
+
+        $http->request(method: 'POST', uri: 'notifications/browser-guest');
+
+        $app = $this->bootingApp();
+        $guestId = $app->get(GuestResolverInterface::class)->resolveId();
+        $clock = $app->get(ClockInterface::class);
+        $repo = $app->get(ChannelsInterface::class)->get('browser')->repository();
+        
+        // Mark existing notifications of the guest as read, so only the ones below are unread
+        $repo->update(where: ['recipient_id' => $guestId], attributes: ['read_at' => $clock->now()]);
+
+        // EXPIRED targeted
+        $repo->create([
+            'recipient_id' => $guestId,
+            'recipient_type' => GuestRecipient::class,
+            'data' => ['subject' => 'Expired', 'content' => 'X'],
+            'created_at' => $clock->now()->modify('+1 second'),
+            'expires_at' => $clock->now()->modify('-1 minute'),
+            'read_at' => null,
+        ]);
+
+        // VALID targeted
+        $repo->create([
+            'recipient_id' => $guestId,
+            'recipient_type' => GuestRecipient::class,
+            'data' => ['subject' => 'Valid', 'content' => 'Y'],
+            'created_at' => $clock->now()->modify('+2 seconds'),
+            'expires_at' => $clock->now()->modify('+10 minutes'),
+            'read_at' => null,
+        ]);
+
+        $response = $http->response()->assertStatus(200);
+
+        $data = json_decode((string)$response->response()->getBody(), true);
+        $this->assertCount(1, $data['notifications']);
+        $this->assertSame('Valid', $data['notifications'][0]['text']);
+        
+        // Both are marked as read, the expired one too
+        $this->assertSame(0, $repo->count(where: ['recipient_id' => $guestId, 'read_at' => ['null']]));
+    }
+    
     public function testNotificationIsMappedCorrectly(): void
     {
         $this->onCreateApp(function(AppInterface $app) {
