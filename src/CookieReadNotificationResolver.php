@@ -31,11 +31,13 @@ class CookieReadNotificationResolver implements ReadNotificationResolverInterfac
      * @param ServerRequestInterface $request
      * @param string $cookieName The cookie key used to store read IDs
      * @param int $lifetime Cookie lifetime in seconds (default: 1 year)
+     * @param int $maxIds The maximum number of the newest IDs to store
      */
     public function __construct(
         protected ServerRequestInterface $request,
         protected string $cookieName = 'browser_read_notifications',
         protected int $lifetime = 3600 * 24 * 365,
+        protected int $maxIds = 50,
     ) {}
 
     /**
@@ -51,18 +53,14 @@ class CookieReadNotificationResolver implements ReadNotificationResolverInterfac
             return [];
         }
 
-        if (!$cookieValues->has($this->cookieName)) {
-            return [];
-        }
+        $raw = $cookieValues->get($this->cookieName);
 
-        $raw = trim((string)$cookieValues->get($this->cookieName));
-
-        if ($raw === '') {
+        if (!is_string($raw) || trim($raw) === '') {
             return [];
         }
 
         // Split comma-separated IDs
-        return array_filter(explode(',', $raw), fn($id) => $id !== '');
+        return array_values(array_filter(explode(',', trim($raw)), fn($id) => $id !== ''));
     }
 
     /**
@@ -79,8 +77,8 @@ class CookieReadNotificationResolver implements ReadNotificationResolverInterfac
             return;
         }
         
-        // Normalize and deduplicate
-        $ids = array_unique(array_map('strval', $ids));
+        // Normalize, deduplicate and keep only the newest IDs
+        $ids = array_slice(array_values(array_unique(array_map('strval', $ids))), -$this->maxIds);
                 
         $cookies->add(
             name: $this->cookieName,
