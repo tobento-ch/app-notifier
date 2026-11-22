@@ -19,7 +19,7 @@ use Tobento\Service\Migration\Actions;
 use Tobento\Service\Notifier\Browser\Channel as ChannelBrowser;
 use Tobento\Service\Notifier\ChannelsInterface;
 use Tobento\Service\Notifier\Storage\Channel as ChannelStorage;
-use Tobento\Service\Notifier\Storage\StorageRepository;
+use Tobento\Service\Repository\Storage\StorageRepository;
 use Tobento\Service\Repository\Storage\Migration\RepositoryAction;
 use Tobento\Service\Repository\Storage\Migration\RepositoryDeleteAction;
 
