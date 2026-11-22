@@ -925,10 +925,12 @@ use Tobento\Service\Notifier\Parameter\Queue;
 
 ```php
 use Tobento\Service\Notifier\AbstractNotification;
+use Tobento\Service\Notifier\NotificationAdapterInterface;
+use Tobento\Service\Notifier\NotificationInterface;
 use Tobento\Service\Notifier\RecipientInterface;
 use Tobento\Service\Notifier\Message;
 
-class CustomUserRegisterNotification extends AbstractNotification implements Message\ToSms
+class CustomUserRegisterNotification extends AbstractNotification implements Message\ToSms, NotificationAdapterInterface
 {
     public function __construct(
         protected UserRegisterNotification $notification,
@@ -941,8 +943,15 @@ class CustomUserRegisterNotification extends AbstractNotification implements Mes
             subject: 'Thanks for your registration',
         );
     }
+    
+    public function adaptedNotification(): NotificationInterface
+    {
+        return $this->notification;
+    }
 }
 ```
+
+Implementing the ```NotificationAdapterInterface::class``` is optional. It keeps the replaced notification available, e.g. in event listeners. See [Notification Adapter](https://github.com/tobento-ch/service-notifier#notification-adapter).
 
 ### Creating Notification Factory
 
