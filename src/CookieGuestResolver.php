@@ -44,13 +44,13 @@ class CookieGuestResolver implements GuestResolverInterface
     {
         $cookieValues = $this->request->getAttribute(CookieValuesInterface::class);
         
-        // If cookie already exists use it
-        if (
-            $cookieValues
-            && $cookieValues instanceof CookieValuesInterface
-            && $cookieValues->has($this->cookieName)
-        ) {
-            return $cookieValues->get($this->cookieName);
+        // If a valid cookie already exists use it
+        if ($cookieValues instanceof CookieValuesInterface) {
+            $id = $cookieValues->get($this->cookieName);
+            
+            if (is_string($id) && str_starts_with($id, $this->prefix)) {
+                return $id;
+            }
         }
         
         // If we already generated an ID during this request, reuse it
